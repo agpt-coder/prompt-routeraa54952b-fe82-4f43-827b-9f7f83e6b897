@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "prompt-router"
+version = "0.1.0"
+description = "The project aims to build an automatic query-routing interface that intelligently routes queries to the most suitable AI model (GPT-4 Turbo, Claude 3 Opus, Gemini 1.5 Pro, or others) based on the query's complexity, the need for efficiency, and cost considerations. The system prioritizes high-quality responses while minimizing latency and keeping within a budget of up to $5,000 per month. Through the user interviews, we've identified the necessity for handling 10K queries per month, with a demand for prompt responses. The choice of model varies with the task: complex NLP tasks will utilise GPT-4 Turbo for its superior understanding and generation capabilities; Claude 3 Opus is preferred for engaging content creation with a focus on moderation and safety; and Gemini 1.5 Pro will serve specific domains requiring up-to-date industry knowledge. Strategies for reducing costs include examining various aspects like accuracy, uniqueness, and information timeliness. Additionally, techniques for lowering latency were discussed, suggesting the use of caching, CDNs, database optimization, and other performance-tuning methods. The technical stack for implementing this solution includes Python for programming, FastAPI for the API framework, PostgreSQL for the database, and Prisma for the ORM. This stack was chosen for its responsiveness, scalability, and developer-friendly nature, which aligns with our goals of creating a fast, reliable, and cost-effective query-routing interface."
+authors = ["AutoGPT <info@agpt.co>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.11"
+fastapi = "*"
+prisma = "*"
+pydantic = "*"
+uvicorn = "*"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

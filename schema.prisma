@@ -1,0 +1,131 @@
+// datasource db defines the database connection settings.
+// It is configured for PostgreSQL and uses an environment variable for the connection URL.
+// The 'extensions' feature enables the use of PostgreSQL-specific data types.
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+}
+
+// generator db configures Prisma Client settings.
+// It is set up to use Prisma Client Python with asyncio interface and specific features.
+generator db {
+  provider             = "prisma-client-py"
+  interface            = "asyncio"
+  recursive_type_depth = 5
+  previewFeatures      = ["postgresqlExtensions"]
+}
+
+model User {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  email     String   @unique
+  password  String
+  role      UserRole @default(VIEWER)
+
+  queries       Query[]
+  feedbacks     Feedback[]
+  apiKeys       APIKey[]
+  subscriptions Subscription[]
+  auditLogs     AuditLog[]
+}
+
+model Query {
+  id              String   @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt       DateTime @default(now())
+  queryText       String
+  complexityScore Float?
+  routedToModel   String?
+  response        String?
+  latency         Float?
+  cost            Float?
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+
+  feedbacks Feedback[]
+}
+
+model Feedback {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt DateTime @default(now())
+  content   String
+  userId    String?
+  queryId   String?
+
+  user  User?  @relation(fields: [userId], references: [id])
+  query Query? @relation(fields: [queryId], references: [id])
+}
+
+model APIKey {
+  id         String   @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt  DateTime @default(now())
+  key        String   @unique
+  userId     String
+  validUntil DateTime
+  user       User     @relation(fields: [userId], references: [id])
+}
+
+model Subscription {
+  id         String           @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt  DateTime         @default(now())
+  userId     String
+  plan       SubscriptionPlan
+  validFrom  DateTime
+  validUntil DateTime
+  user       User             @relation(fields: [userId], references: [id])
+}
+
+model AuditLog {
+  id          String   @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt   DateTime @default(now())
+  logType     LogType
+  description String
+  userId      String?
+
+  user User? @relation(fields: [userId], references: [id])
+}
+
+model SystemConfig {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model AIModel {
+  id             String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt      DateTime  @default(now())
+  name           String
+  description    String?
+  costPerQuery   Float
+  averageLatency Float
+  modelType      ModelType
+
+  // This does not directly relate to queries in this schema but could be linked through a mapping table or logic in the application
+}
+
+enum UserRole {
+  VIEWER
+  SUBSCRIBER
+  ADMIN
+}
+
+enum SubscriptionPlan {
+  BASIC
+  PREMIUM
+  ENTERPRISE
+}
+
+enum LogType {
+  USER_ACTIVITY
+  SYSTEM_PERFORMANCE
+  BUDGET_TRACKING
+}
+
+enum ModelType {
+  GPT4_TURBO
+  CLAUDE_3_OPUS
+  GEMINI_1_5_PRO
+  OTHER
+}
+
